@@ -1,0 +1,133 @@
+---
+title: "Chord-diagram"
+output: html_notebook
+---
+
+```{r}
+# install.packages("data.table")
+library(circlize)
+```
+
+
+```{r}
+# data:
+filename='' # insert name
+data = read.table(filename, header=TRUE, sep=',', row.names=1)
+data = as.matrix(data)
+# data = t(data) # to flip the matrix
+
+# colors:
+rownames_colors = heat.colors(nrow(data))
+# or, rownames_colors = hsv(1,1,seq(0,1,length.out=nrow(data)))
+colnames_colors = hsv(0.5,0.35, seq(0.45, 0.9, length.out=ncol(data)))
+# or, cm.colors(ncol(data))
+colors_cells = c(rownames_colors, colnames_colors)
+
+# colors_connections = c(heat.colors(nrow(data)))
+colors_connections = c(rownames_colors)  # the color of the connections, here same as rownames
+colors_connections = c(matrix(replicate(ncol(data),colors_connections)))
+
+# create image file (if no need, comment the dev.off() in the end):
+png(paste(filename,".png",sep=''), units="in", width=8, height=8, res=400) 
+
+chordDiagram(data,
+             grid.col = colors_cells, # colors
+             transparency = 0.5,
+             link.lty = 1, # border of connections
+             link.border = "black",
+             annotationTrack = "grid",
+             big.gap = 20, # gap between row values and col values
+             small.gap = 2, # gap between all values
+             
+             # make the connections - arrows:
+             directional = 1, 
+             direction.type = c("diffHeight", "arrows"),
+             link.arr.type = "big.arrow", 
+             link.arr.length = 0.07, # length of the arrow tip
+             link.target.prop = FALSE, 
+             diffHeight = -mm_h(2),
+             
+# add names of rows and columns:
+    preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(data))))))
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index,
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA)
+
+# add title to the plot:
+title(gsub(".csv",'',filename))
+
+# add text:
+# text(0,-1, labels = "ligands", adj=c(0.5,0))
+# text(0,1, labels = "receptors", adj=c(0.5,1))
+
+circos.clear()
+dev.off() # delete if no need to save
+```
+
+multiple files:
+```{r}
+directory = "C:/Users/User/Desktop/R/circos/files3/"
+file_list = list.files(path = directory ,pattern = "\\.csv$", full.names = FALSE)
+
+for (file in file_list) {
+    # data:
+    data = read.table(paste(directory,file,sep=''), header=TRUE, sep=',', row.names=1)
+    data = as.matrix(data)
+    # data = t(data) # to flip the matrix
+    
+    # colors:
+    rownames_colors = heat.colors(nrow(data))
+    # or, rownames_colors = hsv(1,1,seq(0,1,length.out=nrow(data)))
+    colnames_colors = hsv(0.5,0.35, seq(0.45, 0.9, length.out=ncol(data)))
+    # or, cm.colors(ncol(data))
+    colors_cells = c(rownames_colors, colnames_colors)
+    
+    # colors_connections = c(heat.colors(nrow(data)))
+    colors_connections = c(rownames_colors)  # the color of the connections, here same as rownames
+    colors_connections = c(matrix(replicate(ncol(data),colors_connections)))
+    
+    filename = gsub(".csv",'',file)  # delete .csv from filename
+    print(paste("processing: ", file))
+    
+    # create image file (if no need, comment the dev.off() in the end):
+    png(paste(directory,filename,".png",sep=''), units="in", width=8, height=8, res=400) 
+
+    chordDiagram(data,
+                 grid.col = colors_cells, # colors
+                 transparency = 0.5,
+                 link.lty = 1, # border of connections
+                 link.border = "black",
+                 annotationTrack = "grid",
+                 big.gap = 20, # gap between row values and col values
+                 small.gap = 2, # gap between all values
+                 
+                 # make the connections - arrows:
+                 directional = 1, 
+                 direction.type = c("diffHeight", "arrows"),
+                 link.arr.type = "big.arrow", 
+                 link.arr.length = 0.07, # length of the arrow tip
+                 link.target.prop = FALSE, 
+                 diffHeight = -mm_h(2),
+                 
+    # add names of rows and columns:
+        preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(data))))))
+    circos.track(track.index = 1, panel.fun = function(x, y) {
+        circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index,
+            facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+    }, bg.border = NA)
+    
+    # add title to the plot:
+    title(filename)
+    
+    # add text:
+    # text(0,-1, labels = "ligands", adj=c(0.5,0))
+    # text(0,1, labels = "receptors", adj=c(0.5,1))
+    
+    circos.clear()
+    dev.off() # delete if no need to save
+}
+
+```
+
+
